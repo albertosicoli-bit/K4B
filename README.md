@@ -21,7 +21,7 @@ L'app funziona anche offline dopo il primo caricamento. I dati restano nel brows
 
 ## Aggiornamenti
 
-Quando modifichi l'app, cambia `CACHE_NAME` in `sw.js` (per esempio da `k4b-radar-v1` a `k4b-radar-v2`). Nell'app puoi poi premere **Aggiorna app** senza cancellare i dati salvati.
+Quando modifichi l'app, cambia `CACHE_NAME` in `sw.js` (per esempio da `k4b-radar-v2` a `k4b-radar-v3`). Nell'app puoi poi premere **Aggiorna app** senza cancellare i dati salvati.
 
 ## Avvio locale
 
