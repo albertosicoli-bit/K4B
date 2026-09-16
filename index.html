@@ -566,8 +566,28 @@
       th, td { padding: 12px; }
     }
   </style>
+  <link rel="stylesheet" href="./cloud.css" />
 </head>
 <body>
+  <section id="authGate" aria-labelledby="authTitle">
+    <div class="auth-card">
+      <div class="brand-mark">K4B</div>
+      <h1 id="authTitle">Il tuo archivio, ovunque.</h1>
+      <p>Accedi a Innovation Radar. Tutti gli utenti registrati condividono lo stesso archivio.</p>
+      <form id="authForm">
+        <label for="authEmail">Email</label>
+        <input id="authEmail" type="email" autocomplete="username" required />
+        <label for="authPassword">Password</label>
+        <input id="authPassword" type="password" autocomplete="current-password" minlength="8" required />
+        <div class="toolbar">
+          <button class="btn" type="submit">Accedi</button>
+          <button class="btn light" type="button" id="signupBtn">Crea account</button>
+        </div>
+      </form>
+      <p id="authMessage" role="status" aria-live="polite">Connessione…</p>
+      <p class="small">L'account dell'app è distinto dall'account della dashboard Supabase. Per assistenza sulla password, contatta l'amministratore.</p>
+    </div>
+  </section>
   <header>
     <div class="header-row">
       <div>
@@ -575,6 +595,9 @@
         <p>Piattaforma MVP per classificare, monitorare e valorizzare progetti, startup, call ed eventi.</p>
       </div>
       <div class="header-actions no-print">
+        <span id="syncStatus" role="status" aria-live="polite">K4B Cloud · V3</span>
+        <button class="btn" onclick="cloudRefresh(true)">Sincronizza dati</button>
+        <button class="btn" onclick="cloudLogout()">Esci</button>
         <button id="installBtn" class="btn" hidden>Installa app</button>
         <button class="btn" onclick="forceAppRefresh()">Aggiorna app</button>
       </div>
@@ -824,7 +847,14 @@
 
       <section id="importExport" class="section">
         <h2>Import / Export</h2>
-        <p class="muted">Usa questa sezione per trasferire la piattaforma da un PC all’altro o per preparare una futura migrazione su server.</p>
+        <p class="muted">Esporta un backup dell'archivio condiviso. Importa nuovi record senza cancellare o sovrascrivere quelli già online.</p>
+        <div class="card" style="margin-bottom:18px;">
+          <h3>Trasferimento dei vecchi dati locali</h3>
+          <p class="muted">Da eseguire una sola volta dal PC che contiene i dati originali. Gli ID già presenti nel cloud vengono saltati. Il backup locale originale rimane intatto.</p>
+          <button class="btn" onclick="cloudMigrateLocal()">Trasferisci dati locali nel cloud</button>
+          <button class="btn light" onclick="cloudExportLegacy()">Scarica backup locale originale</button>
+          <button class="btn light" onclick="cloudExportRecovery()">Scarica modifica non salvata</button>
+        </div>
 
         <div class="grid two">
           <div class="card">
@@ -859,31 +889,29 @@
         <div class="card">
           <h3>Gestione dati locali</h3>
           <p class="muted">
-            Questa versione salva i dati nel browser del PC tramite localStorage. 
-            Per trasferirla su un altro computer devi esportare il JSON o usare il backup copia/incolla.
+            K4B Cloud V3 salva progetti e opportunità su Supabase. Quando l'app è aperta, controlla gli aggiornamenti ogni 10 secondi e al ritorno in primo piano. Le modifiche richiedono una connessione: offline non vengono accodate.
           </p>
           <div class="toolbar">
             <button class="btn light" onclick="loadDemoData()">Carica dati demo</button>
-            <button class="btn danger" onclick="resetAll()">Cancella tutti i dati</button>
           </div>
         </div>
 
         <div class="card" style="margin-top:18px;">
-          <h3>Pronta per evoluzione server</h3>
+          <h3>Archivio condiviso e accesso</h3>
           <p class="muted">
-            In futuro questa piattaforma potrà essere collegata a un database online, login utenti, ruoli, API, upload documenti, motore AI reale e dashboard multiutente.
+            Tutti gli account registrati hanno accesso al medesimo archivio. Registrazione pubblica significa che chiunque crei un account può accedervi: per un gruppo chiuso disabilita le nuove registrazioni nella dashboard e crea gli utenti autorizzati da Authentication → Users.
           </p>
           <ul>
-            <li>Frontend: questo file HTML può diventare la base UI.</li>
-            <li>Database futuro: PostgreSQL, Supabase, Firebase o MySQL.</li>
-            <li>AI futura: classificazione automatica da pitch deck, business plan e descrizioni progetto.</li>
-            <li>Deploy futuro: hosting statico, VPS, Vercel, Netlify o server aziendale.</li>
+            <li>Login email/password e archivio condiviso sono inclusi in V3.</li>
+            <li>Ogni record ha una versione: modifiche concorrenti vengono segnalate, non sovrascritte silenziosamente.</li>
+            <li>Documenti, ruoli amministrativi e assistente AI non sono ancora implementati.</li>
           </ul>
         </div>
       </section>
     </main>
   </div>
 
+  <script src="./cloud.js"></script>
   <script>
     const STORAGE_KEY = "k4b_innovation_radar_data_v1";
 
@@ -910,8 +938,7 @@
     }
 
     function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      renderAll();
+      return cloudSaveState();
     }
 
     function showSection(id, btn) {
@@ -971,8 +998,9 @@
       return '<span class="badge low">Da sviluppare</span>';
     }
 
-    function saveProject(event) {
+    async function saveProject(event) {
       event.preventDefault();
+      if (!cloudCanEdit()) return;
 
       const project = {
         id: uid(),
@@ -999,7 +1027,7 @@
 
       project.score = calculateScore(project);
       state.projects.push(project);
-      saveState();
+      if (!await saveState()) return;
 
       document.getElementById("projectForm").reset();
       alert("Progetto salvato correttamente.");
@@ -1222,23 +1250,27 @@
       detail.innerHTML = "";
     }
 
-    function addTimeline(id) {
+    async function addTimeline(id) {
+      if (!cloudCanEdit()) return;
       const input = document.getElementById("timelineText_" + id);
       const text = input.value.trim();
       if (!text) return;
 
       const p = state.projects.find(x => x.id === id);
+      if (!p) { alert("Il progetto non è più presente. Sincronizza l'archivio."); closeProject(); return; }
       p.timeline = p.timeline || [];
       p.timeline.push({
         date: new Date().toISOString().slice(0,10),
         text
       });
-      saveState();
+      if (!await saveState()) return;
       openProject(id);
     }
 
-    function updateProjectStatus(id) {
+    async function updateProjectStatus(id) {
+      if (!cloudCanEdit()) return;
       const p = state.projects.find(x => x.id === id);
+      if (!p) { alert("Il progetto non è più presente. Sincronizza l'archivio."); closeProject(); return; }
       const newStatus = document.getElementById("statusUpdate_" + id).value;
       p.status = newStatus;
       p.score = calculateScore(p);
@@ -1247,7 +1279,7 @@
         date: new Date().toISOString().slice(0,10),
         text: "Stato aggiornato a: " + newStatus
       });
-      saveState();
+      if (!await saveState()) return;
       openProject(id);
     }
 
@@ -1256,14 +1288,16 @@
       window.print();
     }
 
-    function deleteProject(id) {
-      if (!confirm("Eliminare questo progetto?")) return;
+    async function deleteProject(id) {
+      if (!cloudCanEdit()) return;
+      if (!confirm("Eliminare questo progetto dall'archivio condiviso per TUTTI gli utenti? Esporta prima un backup se necessario.")) return;
       state.projects = state.projects.filter(p => p.id !== id);
-      saveState();
+      if (!await saveState()) return;
       closeProject();
     }
 
-    function saveOpportunity() {
+    async function saveOpportunity() {
+      if (!cloudCanEdit()) return;
       const opportunity = {
         id: uid(),
         name: value("oppName"),
@@ -1280,7 +1314,7 @@
       }
 
       state.opportunities.push(opportunity);
-      saveState();
+      if (!await saveState()) return;
 
       document.getElementById("oppName").value = "";
       document.getElementById("oppDescription").value = "";
@@ -1324,10 +1358,11 @@
       `;
     }
 
-    function deleteOpportunity(id) {
-      if (!confirm("Eliminare questa opportunità?")) return;
+    async function deleteOpportunity(id) {
+      if (!cloudCanEdit()) return;
+      if (!confirm("Eliminare questa opportunità per TUTTI gli utenti?")) return;
       state.opportunities = state.opportunities.filter(o => o.id !== id);
-      saveState();
+      await saveState();
     }
 
     function exportData() {
@@ -1358,34 +1393,26 @@
       URL.revokeObjectURL(url);
     }
 
-    function importData() {
+    async function importData() {
       const file = document.getElementById("importFile").files[0];
       if (!file) {
         alert("Seleziona un file JSON.");
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (!imported.projects && !imported.opportunities) throw new Error("Formato non valido");
-          state = imported;
-          ensureArrays();
-          saveState();
-          alert("Dati importati correttamente.");
-        } catch (err) {
-          alert("Errore import: file non valido.");
-        }
-      };
-      reader.readAsText(file);
+      try {
+        const text = await cloudReadFile(file);
+        await cloudImport(JSON.parse(text));
+      } catch (err) {
+        alert("Importazione non riuscita: " + err.message);
+      }
     }
 
     function generateBackupText() {
       document.getElementById("backupText").value = JSON.stringify(state);
     }
 
-    function importFromText() {
+    async function importFromText() {
       const text = document.getElementById("backupText").value.trim();
       if (!text) {
         alert("Incolla prima un backup JSON.");
@@ -1393,24 +1420,23 @@
       }
 
       try {
-        const imported = JSON.parse(text);
-        if (!imported.projects && !imported.opportunities) throw new Error("Formato non valido");
-        state = imported;
-        ensureArrays();
-        saveState();
-        alert("Backup importato correttamente.");
+        await cloudImport(JSON.parse(text));
       } catch (err) {
         alert("Testo backup non valido.");
       }
     }
 
     function resetAll() {
-      if (!confirm("Vuoi davvero cancellare tutti i dati locali?")) return;
-      state = { projects: [], opportunities: [] };
-      saveState();
+      alert("La cancellazione completa del cloud è disabilitata. Puoi eliminare i singoli record dopo aver esportato un backup.");
     }
 
-    function loadDemoData() {
+    async function loadDemoData() {
+      if (!cloudCanEdit()) return;
+      if (state.projects.length || state.opportunities.length) {
+        alert("I dati demo si possono caricare solo in un archivio vuoto. Usa Import / Export per aggiungere altri dati.");
+        return;
+      }
+      if (!confirm("Caricare dati demo nell'archivio condiviso per tutti?")) return;
       state.projects = [
         {
           id: uid(),
@@ -1495,7 +1521,7 @@
         }
       ];
 
-      saveState();
+      await saveState();
     }
 
     function escapeHtml(str) {
@@ -1534,15 +1560,17 @@
     window.addEventListener("appinstalled", () => showAppStatus("K4B installata correttamente"));
 
     async function forceAppRefresh() {
+      if (cloudBusy || cloudReading) { alert("Attendi la fine della sincronizzazione prima di aggiornare."); return; }
+      if (!navigator.onLine) { alert("Connettiti a Internet per aggiornare l'app."); return; }
       if (!("serviceWorker" in navigator)) {
         location.reload();
         return;
       }
       showAppStatus("Controllo aggiornamenti…");
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map(registration => registration.update()));
+      const registration = await navigator.serviceWorker.getRegistration(location.href);
+      if (registration) await registration.update();
       const cacheNames = await caches.keys();
-      await Promise.all(cacheNames.map(name => caches.delete(name)));
+      await Promise.all(cacheNames.filter(name => name.startsWith('k4b-radar-')).map(name => caches.delete(name)));
       location.replace(location.pathname + "?refresh=" + Date.now());
     }
 
@@ -1552,8 +1580,9 @@
       });
     }
 
-    loadState();
+    state = { projects: [], opportunities: [] };
     renderAll();
+    initCloudApp();
   </script>
 </body>
 </html>
