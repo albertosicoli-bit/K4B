@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>K4B Innovation Radar - Project Platform</title>
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="description" content="Piattaforma K4B per monitorare progetti, startup e opportunità." />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #1d4ed8;
+      --primary-soft: #dbeafe;
+      --success: #15803d;
+      --warning: #b45309;
+      --danger: #b91c1c;
+      --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f172a, #1d4ed8);
+      color: white;
+      padding: 28px 24px;
+    }
+
+    header h1 {
+      margin: 0 0 6px;
+      font-size: 30px;
+    }
+
+    header p {
+      margin: 0;
+      color: #dbeafe;
+      font-size: 15px;
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .header-actions .btn { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.32); }
+    .header-actions .btn:hover { background: rgba(255,255,255,.25); }
+    #installBtn[hidden] { display: none; }
+
+    .app-status {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 50;
+      background: #0f172a;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      display: none;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 92px);
+    }
+
+    aside {
+      background: #0f172a;
+      color: white;
+      padding: 20px;
+    }
+
+    aside .brand {
+      font-weight: bold;
+      margin-bottom: 20px;
+      font-size: 17px;
+    }
+
+    nav button {
+      width: 100%;
+      display: block;
+      text-align: left;
+      background: transparent;
+      color: #cbd5e1;
+      border: none;
+      padding: 13px 12px;
+      border-radius: 12px;
+      font-size: 15px;
+      cursor: pointer;
+      margin-bottom: 6px;
+    }
+
+    nav button.active,
+    nav button:hover {
+      background: rgba(255,255,255,0.12);
+      color: white;
+    }
+
+    main {
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 18px 0;
+      align-items: center;
+    }
+
+    .btn {
+      border: none;
+      background: var(--primary);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn.secondary {
+      background: #334155;
+    }
+
+    .btn.light {
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .btn.danger {
+      background: var(--danger);
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.kpi {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .grid.two {
+      grid-template-columns: 1.2fr 0.8fr;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+    }
+
+    .kpi-card .number {
+      font-size: 32px;
+      font-weight: 800;
+      margin: 8px 0 2px;
+    }
+
+    .kpi-card .label {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+      background: white;
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .form-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #334155;
+      font-size: 13px;
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #e2e8f0;
+      color: #334155;
+      margin: 2px;
+    }
+
+    .badge.high {
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    .badge.medium {
+      background: #fef3c7;
+      color: var(--warning);
+    }
+
+    .badge.low {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .detail-panel {
+      margin-top: 18px;
+      display: none;
+    }
+
+    .timeline {
+      border-left: 3px solid var(--primary-soft);
+      padding-left: 14px;
+      margin-top: 12px;
+    }
+
+    .timeline-item {
+      margin-bottom: 14px;
+    }
+
+    .timeline-item strong {
+      display: block;
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .empty {
+      padding: 24px;
+      background: white;
+      border-radius: var(--radius);
+      border: 1px dashed var(--border);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .print-only {
+      display: none;
+    }
+
+    @media (max-width: 950px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      nav {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+      }
+
+      nav button {
+        white-space: nowrap;
+        width: auto;
+      }
+
+      .grid.kpi,
+      .grid.two,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+
+    @media print {
+      aside, header, .toolbar, nav, .no-print {
+        display: none !important;
+      }
+
+      .app {
+        display: block;
+      }
+
+      main {
+        padding: 0;
+      }
+
+      .section {
+        display: block !important;
+      }
+
+      .card, table {
+        box-shadow: none;
+      }
+
+      .print-only {
+        display: block;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .header-row { align-items: flex-start; flex-direction: column; }
+      .header-actions { width: 100%; }
+      .header-actions .btn { flex: 1; }
+    }
+
+    /* K4B Design System v2 */
+    :root {
+      --bg: #f4f6fa;
+      --text: #172033;
+      --muted: #697386;
+      --border: #e6eaf0;
+      --primary: #5b5bd6;
+      --primary-soft: #eeeeff;
+      --shadow: 0 8px 30px rgba(25,32,56,.07);
+      --radius: 16px;
+    }
+
+    body {
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    header {
+      background: rgba(255,255,255,.92);
+      color: var(--text);
+      padding: 15px 28px 15px 316px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(16px);
+    }
+
+    header h1 { font-size: 21px; letter-spacing: -.03em; }
+    header p { color: var(--muted); font-size: 13px; }
+    .header-actions .btn {
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 2px rgba(15,23,42,.04);
+    }
+    .header-actions .btn:first-child { background: var(--primary); color: white; border-color: var(--primary); }
+    .header-actions .btn:hover { background: white; }
+
+    .app { grid-template-columns: 288px 1fr; min-height: calc(100vh - 76px); }
+    aside {
+      background: #111426;
+      padding: 24px 18px;
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: 288px;
+      z-index: 30;
+    }
+
+    aside .brand {
+      margin: 0 8px 26px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      letter-spacing: -.02em;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, #7777ee, #4b4bc4);
+      box-shadow: 0 7px 20px rgba(91,91,214,.35);
+      font-size: 13px;
+    }
+
+    nav button {
+      color: #aeb7ca;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      margin-bottom: 4px;
+      font-weight: 600;
+      transition: background .18s ease, color .18s ease, transform .18s ease;
+    }
+    nav button.active, nav button:hover {
+      background: linear-gradient(90deg, rgba(91,91,214,.34), rgba(91,91,214,.12));
+      transform: translateX(2px);
+    }
+    nav button::before { display: inline-block; width: 24px; margin-right: 7px; color: #7f8aa4; font-size: 16px; }
+    nav button:nth-child(1)::before { content: "◫"; }
+    nav button:nth-child(2)::before { content: "◎"; }
+    nav button:nth-child(3)::before { content: "+"; }
+    nav button:nth-child(4)::before { content: "◇"; }
+    nav button:nth-child(5)::before { content: "⇅"; }
+    nav button:nth-child(6)::before { content: "⚙"; }
+    nav button.active::before { color: #b9b9ff; }
+
+    main {
+      grid-column: 2;
+      width: 100%;
+      max-width: 1500px;
+      padding: 30px clamp(20px, 3vw, 48px) 52px;
+    }
+
+    h2 { margin: 0 0 5px; font-size: clamp(24px,2.4vw,32px); letter-spacing: -.045em; line-height: 1.15; }
+    .section > .muted { margin-top: 0; margin-bottom: 24px; }
+
+    .btn {
+      border-radius: 10px;
+      padding: 10px 15px;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(91,91,214,.18); }
+    .btn.secondary { background: #30384d; }
+
+    .card {
+      padding: 20px;
+      transition: box-shadow .2s ease, transform .2s ease;
+    }
+    .card h3 { font-size: 16px; letter-spacing: -.015em; }
+    .kpi-card { position: relative; overflow: hidden; }
+    .kpi-card::after {
+      content: "";
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      right: -24px;
+      top: -28px;
+      border-radius: 50%;
+      background: var(--primary-soft);
+    }
+    .kpi-card:nth-child(2)::after { background: #e8f7ef; }
+    .kpi-card:nth-child(3)::after { background: #fff3db; }
+    .kpi-card:nth-child(4)::after { background: #ffecec; }
+    .kpi-card .number { font-size: 34px; letter-spacing: -.045em; }
+    .kpi-card .label { font-size: 13px; font-weight: 650; text-transform: uppercase; letter-spacing: .045em; }
+
+    input, select, textarea {
+      border-radius: 10px;
+      padding: 11px 12px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(91,91,214,.12); }
+    label { font-size: 14px; }
+
+    table { border: 1px solid var(--border); }
+    th, td { padding: 14px 16px; }
+    th { background: #f8f9fc; color: #596276; text-transform: uppercase; letter-spacing: .035em; }
+    tr:hover td { background: #fafbff; }
+    .badge { background: #eef0f5; color: #4a5468; }
+
+    @media (max-width: 950px) {
+      header { padding: 15px 18px; }
+      .app { display: block; }
+      aside { position: sticky; top: 73px; width: 100%; padding: 8px 12px; z-index: 18; }
+      aside .brand { display: none; }
+      nav { gap: 4px; scrollbar-width: none; }
+      nav button { min-width: max-content; padding: 10px 13px; margin: 0; }
+      nav button::before { width: auto; margin-right: 6px; }
+      main { padding: 24px 16px 44px; max-width: none; }
+      .grid.kpi { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .grid.two, .form-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      header p { display: none; }
+      .header-row { flex-direction: row; align-items: center; }
+      .header-actions { width: auto; }
+      .header-actions .btn { flex: initial; padding: 8px 10px; font-size: 12px; }
+      .card { padding: 16px; }
+      .kpi-card .number { font-size: 29px; }
+      th, td { padding: 12px; }
+    }
+  </style>
+  <link rel="stylesheet" href="./cloud.css" />
+</head>
+<body>
+  <section id="authGate" aria-labelledby="authTitle">
+    <div class="auth-card">
+      <div class="brand-mark">K4B</div>
+      <h1 id="authTitle">Il tuo archivio, ovunque.</h1>
+      <p>Accedi a Innovation Radar. Tutti gli utenti registrati condividono lo stesso archivio.</p>
+      <form id="authForm">
+        <label for="authEmail">Email</label>
+        <input id="authEmail" type="email" autocomplete="username" required />
+        <label for="authPassword">Password</label>
+        <input id="authPassword" type="password" autocomplete="current-password" minlength="8" required />
+        <div class="toolbar">
+          <button class="btn" type="submit">Accedi</button>
+          <button class="btn light" type="button" id="signupBtn">Crea account</button>
+        </div>
+      </form>
+      <p id="authMessage" role="status" aria-live="polite">Connessione…</p>
+      <p class="small">L'account dell'app è distinto dall'account della dashboard Supabase. Per assistenza sulla password, contatta l'amministratore.</p>
+    </div>
+  </section>
+  <header>
+    <div class="header-row">
+      <div>
+        <h1>K4B Innovation Radar</h1>
+        <p>Piattaforma MVP per classificare, monitorare e valorizzare progetti, startup, call ed eventi.</p>
+      </div>
+      <div class="header-actions no-print">
+        <span id="syncStatus" role="status" aria-live="polite">K4B Cloud · V3</span>
+        <button class="btn" onclick="cloudRefresh(true)">Sincronizza dati</button>
+        <button class="btn" onclick="cloudLogout()">Esci</button>
+        <button id="installBtn" class="btn" hidden>Installa app</button>
+        <button class="btn" onclick="forceAppRefresh()">Aggiorna app</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="appStatus" class="app-status" role="status" aria-live="polite"></div>
+
+  <div class="app">
+    <aside>
+      <div class="brand"><span class="brand-mark">K4B</span><span>Innovation Radar</span></div>
+      <nav>
+        <button class="active" onclick="showSection('dashboard', this)">Dashboard</button>
+        <button onclick="showSection('projects', this)">Progetti</button>
+        <button onclick="showSection('newProject', this)">Nuovo progetto</button>
+        <button onclick="showSection('opportunities', this)">Opportunità</button>
+        <button onclick="showSection('importExport', this)">Import / Export</button>
+        <button onclick="showSection('settings', this)">Impostazioni</button>
+      </nav>
+    </aside>
+
+    <main>
+      <section id="dashboard" class="section active">
+        <h2>Dashboard ecosistema</h2>
+        <p class="muted">Vista sintetica del patrimonio progetti e delle priorità operative.</p>
+
+        <div class="grid kpi">
+          <div class="card kpi-card">
+            <div class="label">Progetti totali</div>
+            <div class="number" id="kpiTotal">0</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="label">Progetti attivi</div>
+            <div class="number" id="kpiActive">0</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="label">Alto potenziale</div>
+            <div class="number" id="kpiHigh">0</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="label">Da aggiornare</div>
+            <div class="number" id="kpiUpdate">0</div>
+          </div>
+        </div>
+
+        <div class="grid two" style="margin-top:16px;">
+          <div class="card">
+            <h3>Distribuzione per settore</h3>
+            <div id="sectorDistribution"></div>
+          </div>
+          <div class="card">
+            <h3>Priorità suggerite</h3>
+            <div id="priorityList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="projects" class="section">
+        <h2>Archivio progetti</h2>
+        <p class="muted">Cerca, filtra, apri la scheda progetto e aggiorna lo stato.</p>
+
+        <div class="toolbar">
+          <input id="searchInput" placeholder="Cerca per nome, settore, tecnologia, referente..." oninput="renderProjects()" style="max-width:340px;" />
+          <select id="sectorFilter" onchange="renderProjects()" style="max-width:220px;">
+            <option value="">Tutti i settori</option>
+          </select>
+          <select id="statusFilter" onchange="renderProjects()" style="max-width:200px;">
+            <option value="">Tutti gli stati</option>
+            <option>Attivo</option>
+            <option>Da aggiornare</option>
+            <option>In crescita</option>
+            <option>Finanziato</option>
+            <option>Inattivo</option>
+          </select>
+          <select id="maturityFilter" onchange="renderProjects()" style="max-width:200px;">
+            <option value="">Tutte le maturità</option>
+            <option>Idea</option>
+            <option>Prototipo</option>
+            <option>MVP</option>
+            <option>Mercato</option>
+            <option>Scale-up</option>
+          </select>
+          <button class="btn light" onclick="clearFilters()">Pulisci filtri</button>
+        </div>
+
+        <div id="projectsTable"></div>
+
+        <div id="projectDetail" class="detail-panel card"></div>
+      </section>
+
+      <section id="newProject" class="section">
+        <h2>Nuovo progetto</h2>
+        <p class="muted">Inserisci un progetto o una startup. La piattaforma calcola uno score base e propone una classificazione.</p>
+
+        <div class="card">
+          <form id="projectForm" onsubmit="saveProject(event)">
+            <div class="form-grid">
+              <div>
+                <label>Nome progetto / startup</label>
+                <input required id="name" />
+              </div>
+              <div>
+                <label>Referente</label>
+                <input id="owner" />
+              </div>
+              <div>
+                <label>Email</label>
+                <input id="email" type="email" />
+              </div>
+              <div>
+                <label>Evento / call di provenienza</label>
+                <input id="eventName" placeholder="es. Innovation Village Award 2026" />
+              </div>
+              <div>
+                <label>Settore</label>
+                <select id="sector">
+                  <option>AI / Digitale</option>
+                  <option>Health / Life Science</option>
+                  <option>Energy / Green Tech</option>
+                  <option>Agritech</option>
+                  <option>Turismo / Cultura</option>
+                  <option>Legaltech</option>
+                  <option>Cybersecurity</option>
+                  <option>Manufacturing</option>
+                  <option>Space Economy</option>
+                  <option>Altro</option>
+                </select>
+              </div>
+              <div>
+                <label>Tecnologia prevalente</label>
+                <input id="technology" placeholder="AI, IoT, SaaS, biotech..." />
+              </div>
+              <div>
+                <label>Maturità</label>
+                <select id="maturity">
+                  <option>Idea</option>
+                  <option>Prototipo</option>
+                  <option>MVP</option>
+                  <option>Mercato</option>
+                  <option>Scale-up</option>
+                </select>
+              </div>
+              <div>
+                <label>Stato</label>
+                <select id="status">
+                  <option>Attivo</option>
+                  <option>Da aggiornare</option>
+                  <option>In crescita</option>
+                  <option>Finanziato</option>
+                  <option>Inattivo</option>
+                </select>
+              </div>
+              <div>
+                <label>Bisogno principale</label>
+                <select id="need">
+                  <option>Fondi</option>
+                  <option>Mentor</option>
+                  <option>Partner industriale</option>
+                  <option>Business development</option>
+                  <option>Validazione mercato</option>
+                  <option>Brevetti / IP</option>
+                  <option>Marketing / comunicazione</option>
+                  <option>Internazionalizzazione</option>
+                </select>
+              </div>
+              <div>
+                <label>Traction / validazione</label>
+                <select id="traction">
+                  <option>Da validare</option>
+                  <option>Primi utenti</option>
+                  <option>Clienti paganti</option>
+                  <option>Partnership attive</option>
+                  <option>Ricavi ricorrenti</option>
+                </select>
+              </div>
+              <div class="full">
+                <label>Descrizione progetto</label>
+                <textarea id="description" placeholder="Descrivi problema, soluzione, target, tecnologia e stato attuale"></textarea>
+              </div>
+              <div class="full">
+                <label>Note interne / follow-up</label>
+                <textarea id="notes" placeholder="Azioni, contatti, valutazioni, prossimi step"></textarea>
+              </div>
+            </div>
+
+            <div class="toolbar">
+              <button class="btn" type="submit">Salva progetto</button>
+              <button class="btn secondary" type="button" onclick="document.getElementById('projectForm').reset()">Pulisci form</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section id="opportunities" class="section">
+        <h2>Opportunità e matching</h2>
+        <p class="muted">Sezione dimostrativa: collega progetti a bandi, investitori, eventi, mentor e partner.</p>
+
+        <div class="card">
+          <h3>Aggiungi opportunità</h3>
+          <div class="form-grid">
+            <div>
+              <label>Nome opportunità</label>
+              <input id="oppName" placeholder="es. Bando Startup Innovative Campania" />
+            </div>
+            <div>
+              <label>Tipo</label>
+              <select id="oppType">
+                <option>Bando</option>
+                <option>Evento</option>
+                <option>Investitore</option>
+                <option>Corporate Challenge</option>
+                <option>Mentor</option>
+                <option>Partner</option>
+              </select>
+            </div>
+            <div>
+              <label>Settore target</label>
+              <select id="oppSector">
+                <option>AI / Digitale</option>
+                <option>Health / Life Science</option>
+                <option>Energy / Green Tech</option>
+                <option>Agritech</option>
+                <option>Turismo / Cultura</option>
+                <option>Legaltech</option>
+                <option>Cybersecurity</option>
+                <option>Manufacturing</option>
+                <option>Space Economy</option>
+                <option>Altro</option>
+              </select>
+            </div>
+            <div>
+              <label>Scadenza / data</label>
+              <input id="oppDeadline" type="date" />
+            </div>
+            <div class="full">
+              <label>Descrizione</label>
+              <textarea id="oppDescription"></textarea>
+            </div>
+          </div>
+          <div class="toolbar">
+            <button class="btn" onclick="saveOpportunity()">Salva opportunità</button>
+          </div>
+        </div>
+
+        <div id="opportunitiesTable" style="margin-top:18px;"></div>
+      </section>
+
+      <section id="importExport" class="section">
+        <h2>Import / Export</h2>
+        <p class="muted">Esporta un backup dell'archivio condiviso. Importa nuovi record senza cancellare o sovrascrivere quelli già online.</p>
+        <div class="card" style="margin-bottom:18px;">
+          <h3>Trasferimento dei vecchi dati locali</h3>
+          <p class="muted">Da eseguire una sola volta dal PC che contiene i dati originali. Gli ID già presenti nel cloud vengono saltati. Il backup locale originale rimane intatto.</p>
+          <button class="btn" onclick="cloudMigrateLocal()">Trasferisci dati locali nel cloud</button>
+          <button class="btn light" onclick="cloudExportLegacy()">Scarica backup locale originale</button>
+          <button class="btn light" onclick="cloudExportRecovery()">Scarica modifica non salvata</button>
+        </div>
+
+        <div class="grid two">
+          <div class="card">
+            <h3>Esporta dati</h3>
+            <p class="muted">Scarica tutti i progetti e le opportunità in formato JSON.</p>
+            <button class="btn" onclick="exportData()">Esporta JSON</button>
+            <button class="btn light" onclick="exportCSV()">Esporta progetti CSV</button>
+          </div>
+          <div class="card">
+            <h3>Importa dati</h3>
+            <p class="muted">Carica un file JSON precedentemente esportato.</p>
+            <input type="file" id="importFile" accept=".json" />
+            <div class="toolbar">
+              <button class="btn" onclick="importData()">Importa JSON</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:18px;">
+          <h3>Backup rapido copia/incolla</h3>
+          <p class="muted">Copia il testo qui sotto e incollalo su un altro PC usando “Importa da testo”.</p>
+          <textarea id="backupText" style="min-height:160px;"></textarea>
+          <div class="toolbar">
+            <button class="btn light" onclick="generateBackupText()">Genera testo backup</button>
+            <button class="btn" onclick="importFromText()">Importa da testo</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="settings" class="section">
+        <h2>Impostazioni</h2>
+        <div class="card">
+          <h3>Gestione dati locali</h3>
+          <p class="muted">
+            K4B Cloud V3 salva progetti e opportunità su Supabase. Quando l'app è aperta, controlla gli aggiornamenti ogni 10 secondi e al ritorno in primo piano. Le modifiche richiedono una connessione: offline non vengono accodate.
+          </p>
+          <div class="toolbar">
+            <button class="btn light" onclick="loadDemoData()">Carica dati demo</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:18px;">
+          <h3>Archivio condiviso e accesso</h3>
+          <p class="muted">
+            Tutti gli account registrati hanno accesso al medesimo archivio. Registrazione pubblica significa che chiunque crei un account può accedervi: per un gruppo chiuso disabilita le nuove registrazioni nella dashboard e crea gli utenti autorizzati da Authentication → Users.
+          </p>
+          <ul>
+            <li>Login email/password e archivio condiviso sono inclusi in V3.</li>
+            <li>Ogni record ha una versione: modifiche concorrenti vengono segnalate, non sovrascritte silenziosamente.</li>
+            <li>Documenti, ruoli amministrativi e assistente AI non sono ancora implementati.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./cloud.js"></script>
+  <script>
+    const STORAGE_KEY = "k4b_innovation_radar_data_v1";
+
+    let state = {
+      projects: [],
+      opportunities: []
+    };
+
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          state = JSON.parse(saved);
+        } catch (e) {
+          console.error("Errore caricamento dati", e);
+        }
+      }
+      ensureArrays();
+    }
+
+    function ensureArrays() {
+      if (!state.projects) state.projects = [];
+      if (!state.opportunities) state.opportunities = [];
+    }
+
+    function saveState() {
+      return cloudSaveState();
+    }
+
+    function showSection(id, btn) {
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+
+      document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+      if (btn) btn.classList.add("active");
+
+      renderAll();
+    }
+
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).substring(2);
+    }
+
+    function calculateScore(project) {
+      const maturityScores = {
+        "Idea": 10,
+        "Prototipo": 25,
+        "MVP": 45,
+        "Mercato": 65,
+        "Scale-up": 80
+      };
+
+      const tractionScores = {
+        "Da validare": 5,
+        "Primi utenti": 15,
+        "Clienti paganti": 25,
+        "Partnership attive": 30,
+        "Ricavi ricorrenti": 35
+      };
+
+      const statusBonus = {
+        "Attivo": 10,
+        "Da aggiornare": 0,
+        "In crescita": 15,
+        "Finanziato": 15,
+        "Inattivo": -10
+      };
+
+      let score = 0;
+      score += maturityScores[project.maturity] || 0;
+      score += tractionScores[project.traction] || 0;
+      score += statusBonus[project.status] || 0;
+
+      if ((project.description || "").length > 120) score += 5;
+      if (project.technology) score += 5;
+      if (project.email) score += 5;
+
+      return Math.max(0, Math.min(100, score));
+    }
+
+    function scoreBadge(score) {
+      if (score >= 75) return '<span class="badge high">Alto</span>';
+      if (score >= 50) return '<span class="badge medium">Medio</span>';
+      return '<span class="badge low">Da sviluppare</span>';
+    }
+
+    async function saveProject(event) {
+      event.preventDefault();
+      if (!cloudCanEdit()) return;
+
+      const project = {
+        id: uid(),
+        name: value("name"),
+        owner: value("owner"),
+        email: value("email"),
+        eventName: value("eventName"),
+        sector: value("sector"),
+        technology: value("technology"),
+        maturity: value("maturity"),
+        status: value("status"),
+        need: value("need"),
+        traction: value("traction"),
+        description: value("description"),
+        notes: value("notes"),
+        createdAt: new Date().toISOString(),
+        timeline: [
+          {
+            date: new Date().toISOString().slice(0, 10),
+            text: "Progetto inserito nella piattaforma"
+          }
+        ]
+      };
+
+      project.score = calculateScore(project);
+      state.projects.push(project);
+      if (!await saveState()) return;
+
+      document.getElementById("projectForm").reset();
+      alert("Progetto salvato correttamente.");
+    }
+
+    function value(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function renderAll() {
+      renderDashboard();
+      renderProjects();
+      renderFilters();
+      renderOpportunities();
+    }
+
+    function renderDashboard() {
+      const total = state.projects.length;
+      const active = state.projects.filter(p => ["Attivo", "In crescita", "Finanziato"].includes(p.status)).length;
+      const high = state.projects.filter(p => (p.score || 0) >= 75).length;
+      const update = state.projects.filter(p => p.status === "Da aggiornare").length;
+
+      setText("kpiTotal", total);
+      setText("kpiActive", active);
+      setText("kpiHigh", high);
+      setText("kpiUpdate", update);
+
+      const sectors = {};
+      state.projects.forEach(p => sectors[p.sector] = (sectors[p.sector] || 0) + 1);
+
+      const sectorHtml = Object.entries(sectors).length
+        ? Object.entries(sectors)
+            .sort((a,b) => b[1] - a[1])
+            .map(([sector, count]) => `<p><strong>${escapeHtml(sector)}</strong>: ${count} progetti</p>`)
+            .join("")
+        : '<div class="empty">Nessun progetto caricato.</div>';
+
+      document.getElementById("sectorDistribution").innerHTML = sectorHtml;
+
+      const priorities = [...state.projects]
+        .sort((a,b) => (b.score || 0) - (a.score || 0))
+        .slice(0, 6);
+
+      const priorityHtml = priorities.length
+        ? priorities.map(p => `
+          <p>
+            <strong>${escapeHtml(p.name)}</strong><br>
+            <span class="small">${escapeHtml(p.sector)} · Score ${p.score}/100 · ${escapeHtml(p.need)}</span>
+          </p>
+        `).join("")
+        : '<div class="empty">Carica i primi progetti per vedere le priorità.</div>';
+
+      document.getElementById("priorityList").innerHTML = priorityHtml;
+    }
+
+    function setText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+
+    function renderProjects() {
+      const container = document.getElementById("projectsTable");
+      if (!container) return;
+
+      let projects = [...state.projects];
+
+      const search = (document.getElementById("searchInput")?.value || "").toLowerCase();
+      const sector = document.getElementById("sectorFilter")?.value || "";
+      const status = document.getElementById("statusFilter")?.value || "";
+      const maturity = document.getElementById("maturityFilter")?.value || "";
+
+      if (search) {
+        projects = projects.filter(p => JSON.stringify(p).toLowerCase().includes(search));
+      }
+      if (sector) projects = projects.filter(p => p.sector === sector);
+      if (status) projects = projects.filter(p => p.status === status);
+      if (maturity) projects = projects.filter(p => p.maturity === maturity);
+
+      projects.sort((a,b) => (b.score || 0) - (a.score || 0));
+
+      if (!projects.length) {
+        container.innerHTML = '<div class="empty">Nessun progetto trovato.</div>';
+        return;
+      }
+
+      container.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Progetto</th>
+              <th>Settore</th>
+              <th>Maturità</th>
+              <th>Bisogno</th>
+              <th>Stato</th>
+              <th>Score</th>
+              <th class="right">Azioni</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${projects.map(p => `
+              <tr>
+                <td>
+                  <strong>${escapeHtml(p.name)}</strong><br>
+                  <span class="small">${escapeHtml(p.owner || "")} ${p.email ? "· " + escapeHtml(p.email) : ""}</span>
+                </td>
+                <td>${escapeHtml(p.sector || "")}<br><span class="small">${escapeHtml(p.technology || "")}</span></td>
+                <td>${escapeHtml(p.maturity || "")}</td>
+                <td>${escapeHtml(p.need || "")}</td>
+                <td><span class="badge">${escapeHtml(p.status || "")}</span></td>
+                <td><strong>${p.score || 0}/100</strong><br>${scoreBadge(p.score || 0)}</td>
+                <td class="right">
+                  <button class="btn light" onclick="openProject('${p.id}')">Apri</button>
+                  <button class="btn danger" onclick="deleteProject('${p.id}')">Elimina</button>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderFilters() {
+      const sectorFilter = document.getElementById("sectorFilter");
+      if (!sectorFilter) return;
+
+      const current = sectorFilter.value;
+      const sectors = [...new Set(state.projects.map(p => p.sector).filter(Boolean))].sort();
+
+      sectorFilter.innerHTML = '<option value="">Tutti i settori</option>' +
+        sectors.map(s => `<option ${s === current ? "selected" : ""}>${escapeHtml(s)}</option>`).join("");
+    }
+
+    function clearFilters() {
+      document.getElementById("searchInput").value = "";
+      document.getElementById("sectorFilter").value = "";
+      document.getElementById("statusFilter").value = "";
+      document.getElementById("maturityFilter").value = "";
+      renderProjects();
+    }
+
+    function openProject(id) {
+      const p = state.projects.find(x => x.id === id);
+      if (!p) return;
+
+      const matchingOpps = state.opportunities.filter(o => o.sector === p.sector);
+
+      const detail = document.getElementById("projectDetail");
+      detail.style.display = "block";
+      detail.innerHTML = `
+        <div class="toolbar" style="justify-content:space-between;">
+          <div>
+            <h2 style="margin:0;">${escapeHtml(p.name)}</h2>
+            <p class="muted">${escapeHtml(p.sector)} · ${escapeHtml(p.maturity)} · Score ${p.score}/100</p>
+          </div>
+          <div>
+            <button class="btn light" onclick="printProject('${p.id}')">Stampa / PDF</button>
+            <button class="btn secondary" onclick="closeProject()">Chiudi</button>
+          </div>
+        </div>
+
+        <div class="grid two">
+          <div>
+            <h3>Descrizione</h3>
+            <p>${escapeHtml(p.description || "Nessuna descrizione inserita.")}</p>
+
+            <h3>Note interne</h3>
+            <p>${escapeHtml(p.notes || "Nessuna nota inserita.")}</p>
+
+            <h3>Timeline</h3>
+            <div class="timeline">
+              ${(p.timeline || []).map(t => `
+                <div class="timeline-item">
+                  <strong>${escapeHtml(t.date)}</strong>
+                  <span>${escapeHtml(t.text)}</span>
+                </div>
+              `).join("")}
+            </div>
+
+            <div class="toolbar no-print">
+              <input id="timelineText_${p.id}" placeholder="Aggiungi aggiornamento timeline..." />
+              <button class="btn" onclick="addTimeline('${p.id}')">Aggiungi</button>
+            </div>
+          </div>
+
+          <div>
+            <h3>Dati principali</h3>
+            <p><strong>Referente:</strong> ${escapeHtml(p.owner || "-")}</p>
+            <p><strong>Email:</strong> ${escapeHtml(p.email || "-")}</p>
+            <p><strong>Evento:</strong> ${escapeHtml(p.eventName || "-")}</p>
+            <p><strong>Tecnologia:</strong> ${escapeHtml(p.technology || "-")}</p>
+            <p><strong>Bisogno:</strong> ${escapeHtml(p.need || "-")}</p>
+            <p><strong>Traction:</strong> ${escapeHtml(p.traction || "-")}</p>
+
+            <h3>Matching opportunità</h3>
+            ${matchingOpps.length ? matchingOpps.map(o => `
+              <p>
+                <span class="badge high">${escapeHtml(o.type)}</span>
+                <strong>${escapeHtml(o.name)}</strong><br>
+                <span class="small">${escapeHtml(o.deadline || "Nessuna scadenza")}</span>
+              </p>
+            `).join("") : '<p class="muted">Nessuna opportunità coerente caricata per questo settore.</p>'}
+
+            <h3>Aggiorna stato</h3>
+            <select id="statusUpdate_${p.id}">
+              ${["Attivo","Da aggiornare","In crescita","Finanziato","Inattivo"].map(s => `<option ${p.status === s ? "selected" : ""}>${s}</option>`).join("")}
+            </select>
+            <div class="toolbar no-print">
+              <button class="btn" onclick="updateProjectStatus('${p.id}')">Aggiorna stato</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      detail.scrollIntoView({behavior: "smooth"});
+    }
+
+    function closeProject() {
+      const detail = document.getElementById("projectDetail");
+      detail.style.display = "none";
+      detail.innerHTML = "";
+    }
+
+    async function addTimeline(id) {
+      if (!cloudCanEdit()) return;
+      const input = document.getElementById("timelineText_" + id);
+      const text = input.value.trim();
+      if (!text) return;
+
+      const p = state.projects.find(x => x.id === id);
+      if (!p) { alert("Il progetto non è più presente. Sincronizza l'archivio."); closeProject(); return; }
+      p.timeline = p.timeline || [];
+      p.timeline.push({
+        date: new Date().toISOString().slice(0,10),
+        text
+      });
+      if (!await saveState()) return;
+      openProject(id);
+    }
+
+    async function updateProjectStatus(id) {
+      if (!cloudCanEdit()) return;
+      const p = state.projects.find(x => x.id === id);
+      if (!p) { alert("Il progetto non è più presente. Sincronizza l'archivio."); closeProject(); return; }
+      const newStatus = document.getElementById("statusUpdate_" + id).value;
+      p.status = newStatus;
+      p.score = calculateScore(p);
+      p.timeline = p.timeline || [];
+      p.timeline.push({
+        date: new Date().toISOString().slice(0,10),
+        text: "Stato aggiornato a: " + newStatus
+      });
+      if (!await saveState()) return;
+      openProject(id);
+    }
+
+    function printProject(id) {
+      openProject(id);
+      window.print();
+    }
+
+    async function deleteProject(id) {
+      if (!cloudCanEdit()) return;
+      if (!confirm("Eliminare questo progetto dall'archivio condiviso per TUTTI gli utenti? Esporta prima un backup se necessario.")) return;
+      state.projects = state.projects.filter(p => p.id !== id);
+      if (!await saveState()) return;
+      closeProject();
+    }
+
+    async function saveOpportunity() {
+      if (!cloudCanEdit()) return;
+      const opportunity = {
+        id: uid(),
+        name: value("oppName"),
+        type: value("oppType"),
+        sector: value("oppSector"),
+        deadline: value("oppDeadline"),
+        description: value("oppDescription"),
+        createdAt: new Date().toISOString()
+      };
+
+      if (!opportunity.name) {
+        alert("Inserisci il nome dell'opportunità.");
+        return;
+      }
+
+      state.opportunities.push(opportunity);
+      if (!await saveState()) return;
+
+      document.getElementById("oppName").value = "";
+      document.getElementById("oppDescription").value = "";
+      document.getElementById("oppDeadline").value = "";
+    }
+
+    function renderOpportunities() {
+      const container = document.getElementById("opportunitiesTable");
+      if (!container) return;
+
+      if (!state.opportunities.length) {
+        container.innerHTML = '<div class="empty">Nessuna opportunità caricata.</div>';
+        return;
+      }
+
+      container.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Opportunità</th>
+              <th>Tipo</th>
+              <th>Settore</th>
+              <th>Scadenza</th>
+              <th>Descrizione</th>
+              <th class="right">Azioni</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${state.opportunities.map(o => `
+              <tr>
+                <td><strong>${escapeHtml(o.name)}</strong></td>
+                <td><span class="badge">${escapeHtml(o.type)}</span></td>
+                <td>${escapeHtml(o.sector)}</td>
+                <td>${escapeHtml(o.deadline || "-")}</td>
+                <td>${escapeHtml(o.description || "-")}</td>
+                <td class="right"><button class="btn danger" onclick="deleteOpportunity('${o.id}')">Elimina</button></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function deleteOpportunity(id) {
+      if (!cloudCanEdit()) return;
+      if (!confirm("Eliminare questa opportunità per TUTTI gli utenti?")) return;
+      state.opportunities = state.opportunities.filter(o => o.id !== id);
+      await saveState();
+    }
+
+    function exportData() {
+      const data = JSON.stringify(state, null, 2);
+      downloadFile("k4b_innovation_radar_backup.json", data, "application/json");
+    }
+
+    function exportCSV() {
+      const headers = ["Nome", "Referente", "Email", "Evento", "Settore", "Tecnologia", "Maturita", "Stato", "Bisogno", "Traction", "Score", "Descrizione", "Note"];
+      const rows = state.projects.map(p => [
+        p.name, p.owner, p.email, p.eventName, p.sector, p.technology, p.maturity, p.status, p.need, p.traction, p.score, p.description, p.notes
+      ]);
+
+      const csv = [headers, ...rows]
+        .map(row => row.map(cell => `"${String(cell || "").replaceAll('"', '""')}"`).join(","))
+        .join("\n");
+
+      downloadFile("k4b_progetti.csv", csv, "text/csv");
+    }
+
+    function downloadFile(filename, content, type) {
+      const blob = new Blob([content], {type});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function importData() {
+      const file = document.getElementById("importFile").files[0];
+      if (!file) {
+        alert("Seleziona un file JSON.");
+        return;
+      }
+
+      try {
+        const text = await cloudReadFile(file);
+        await cloudImport(JSON.parse(text));
+      } catch (err) {
+        alert("Importazione non riuscita: " + err.message);
+      }
+    }
+
+    function generateBackupText() {
+      document.getElementById("backupText").value = JSON.stringify(state);
+    }
+
+    async function importFromText() {
+      const text = document.getElementById("backupText").value.trim();
+      if (!text) {
+        alert("Incolla prima un backup JSON.");
+        return;
+      }
+
+      try {
+        await cloudImport(JSON.parse(text));
+      } catch (err) {
+        alert("Testo backup non valido.");
+      }
+    }
+
+    function resetAll() {
+      alert("La cancellazione completa del cloud è disabilitata. Puoi eliminare i singoli record dopo aver esportato un backup.");
+    }
+
+    async function loadDemoData() {
+      if (!cloudCanEdit()) return;
+      if (state.projects.length || state.opportunities.length) {
+        alert("I dati demo si possono caricare solo in un archivio vuoto. Usa Import / Export per aggiungere altri dati.");
+        return;
+      }
+      if (!confirm("Caricare dati demo nell'archivio condiviso per tutti?")) return;
+      state.projects = [
+        {
+          id: uid(),
+          name: "MedAI Care",
+          owner: "Laura Romano",
+          email: "laura@example.com",
+          eventName: "Innovation Village Award 2025",
+          sector: "Health / Life Science",
+          technology: "AI, wearable, SaaS",
+          maturity: "MVP",
+          status: "Attivo",
+          need: "Validazione mercato",
+          traction: "Primi utenti",
+          description: "Piattaforma digitale per monitorare pazienti cronici tramite dispositivi wearable e algoritmi predittivi.",
+          notes: "Da proporre a partner sanitari e bandi digital health.",
+          createdAt: new Date().toISOString(),
+          timeline: [
+            {date: "2025-05-10", text: "Partecipazione a Innovation Village Award"},
+            {date: "2026-06-24", text: "Inserito nel radar progetti"}
+          ]
+        },
+        {
+          id: uid(),
+          name: "AgriSense",
+          owner: "Marco De Luca",
+          email: "marco@example.com",
+          eventName: "Call Agritech 2024",
+          sector: "Agritech",
+          technology: "IoT, sensori, analytics",
+          maturity: "Prototipo",
+          status: "Da aggiornare",
+          need: "Partner industriale",
+          traction: "Da validare",
+          description: "Sistema di sensori per monitoraggio dell'umidità e ottimizzazione irrigazione in aziende agricole.",
+          notes: "Ricontattare per capire stato prototipo.",
+          createdAt: new Date().toISOString(),
+          timeline: [
+            {date: "2024-10-01", text: "Partecipazione call Agritech"},
+            {date: "2026-06-24", text: "Da ricontattare"}
+          ]
+        },
+        {
+          id: uid(),
+          name: "GreenGrid Analytics",
+          owner: "Sara Esposito",
+          email: "sara@example.com",
+          eventName: "Energy Challenge 2026",
+          sector: "Energy / Green Tech",
+          technology: "AI, energy analytics",
+          maturity: "Mercato",
+          status: "In crescita",
+          need: "Business development",
+          traction: "Clienti paganti",
+          description: "Software per ottimizzare consumi energetici di PMI e comunità energetiche tramite AI.",
+          notes: "Buon potenziale per corporate energy.",
+          createdAt: new Date().toISOString(),
+          timeline: [
+            {date: "2026-03-15", text: "Presentazione a Energy Challenge"},
+            {date: "2026-06-24", text: "Possibile short list corporate"}
+          ]
+        }
+      ];
+
+      state.projects.forEach(p => p.score = calculateScore(p));
+
+      state.opportunities = [
+        {
+          id: uid(),
+          name: "Bando Digital Health",
+          type: "Bando",
+          sector: "Health / Life Science",
+          deadline: "2026-09-30",
+          description: "Opportunità per startup digital health con MVP e necessità di validazione."
+        },
+        {
+          id: uid(),
+          name: "Corporate Energy Match",
+          type: "Corporate Challenge",
+          sector: "Energy / Green Tech",
+          deadline: "2026-10-15",
+          description: "Ricerca soluzioni per efficienza energetica e monitoraggio consumi."
+        }
+      ];
+
+      await saveState();
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    let deferredInstallPrompt = null;
+
+    function showAppStatus(message) {
+      const status = document.getElementById("appStatus");
+      status.textContent = message;
+      status.style.display = "block";
+      clearTimeout(showAppStatus.timer);
+      showAppStatus.timer = setTimeout(() => status.style.display = "none", 3500);
+    }
+
+    window.addEventListener("beforeinstallprompt", event => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      document.getElementById("installBtn").hidden = false;
+    });
+
+    document.getElementById("installBtn").addEventListener("click", async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      document.getElementById("installBtn").hidden = true;
+    });
+
+    window.addEventListener("appinstalled", () => showAppStatus("K4B installata correttamente"));
+
+    async function forceAppRefresh() {
+      if (cloudBusy || cloudReading) { alert("Attendi la fine della sincronizzazione prima di aggiornare."); return; }
+      if (!navigator.onLine) { alert("Connettiti a Internet per aggiornare l'app."); return; }
+      if (!("serviceWorker" in navigator)) {
+        location.reload();
+        return;
+      }
+      showAppStatus("Controllo aggiornamenti…");
+      const registration = await navigator.serviceWorker.getRegistration(location.href);
+      if (registration) await registration.update();
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.filter(name => name.startsWith('k4b-radar-')).map(name => caches.delete(name)));
+      location.replace(location.pathname + "?refresh=" + Date.now());
+    }
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(error => console.error("Service worker", error));
+      });
+    }
+
+    state = { projects: [], opportunities: [] };
+    renderAll();
+    initCloudApp();
+  </script>
+</body>
+</html>
