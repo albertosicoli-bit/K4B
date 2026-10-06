@@ -1,6 +1,6 @@
 # K4B Innovation Radar
 
-Web app/PWA installabile per classificare e monitorare progetti, startup, call e opportunità. Versione 4: login Supabase, archivio online condiviso e Assistente dati privato.
+Web app/PWA installabile per classificare e monitorare progetti, startup, call e opportunità. Versione 4.1: login Supabase, archivio online condiviso e Assistente dati privato. La versione 4.1 corregge il posizionamento del pannello informativo dell'assistente.
 
 ## Assistente dati V4
 
