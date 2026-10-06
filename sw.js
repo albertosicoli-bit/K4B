@@ -1,10 +1,12 @@
-const CACHE_NAME = "k4b-radar-v3";
+const CACHE_NAME = "k4b-radar-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./cloud.js",
   "./cloud.css",
+  "./assistant.js",
+  "./assistant.css",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
 ];

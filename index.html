@@ -567,6 +567,7 @@
     }
   </style>
   <link rel="stylesheet" href="./cloud.css" />
+  <link rel="stylesheet" href="./assistant.css" />
 </head>
 <body>
   <section id="authGate" aria-labelledby="authTitle">
@@ -614,6 +615,7 @@
         <button onclick="showSection('projects', this)">Progetti</button>
         <button onclick="showSection('newProject', this)">Nuovo progetto</button>
         <button onclick="showSection('opportunities', this)">Opportunità</button>
+        <button onclick="showSection('dataAssistant', this)">Assistente dati</button>
         <button onclick="showSection('importExport', this)">Import / Export</button>
         <button onclick="showSection('settings', this)">Impostazioni</button>
       </nav>
@@ -845,6 +847,54 @@
         <div id="opportunitiesTable" style="margin-top:18px;"></div>
       </section>
 
+      <section id="dataAssistant" class="section">
+        <div class="assistant-heading">
+          <div>
+            <span class="assistant-kicker">RICERCA SULL'ARCHIVIO</span>
+            <h2>Assistente dati</h2>
+            <p class="muted">Fai una domanda sui progetti e sulle opportunità presenti nel database. La risposta usa esclusivamente i dati sincronizzati di K4B.</p>
+          </div>
+          <span class="assistant-private">Solo dati K4B</span>
+        </div>
+
+        <div class="assistant-layout">
+          <div class="card assistant-query-card">
+            <form id="assistantForm" onsubmit="askDataAssistant(event)">
+              <label for="assistantQuestion">La tua domanda</label>
+              <textarea id="assistantQuestion" maxlength="1000" placeholder="Esempio: quali sono i progetti Health con score più alto?" required></textarea>
+              <div class="assistant-actions">
+                <span class="small">Invio per cercare · Maiuscole + Invio per andare a capo</span>
+                <button class="btn" type="submit">Analizza i dati</button>
+              </div>
+            </form>
+            <div class="assistant-suggestions" aria-label="Domande suggerite">
+              <button type="button" onclick="askSuggestedQuestion(this)">Quali sono i progetti con score più alto?</button>
+              <button type="button" onclick="askSuggestedQuestion(this)">Quali progetti devono essere aggiornati?</button>
+              <button type="button" onclick="askSuggestedQuestion(this)">Quali opportunità scadono prima?</button>
+              <button type="button" onclick="askSuggestedQuestion(this)">Abbina i progetti alle opportunità</button>
+            </div>
+          </div>
+
+          <aside class="card assistant-info-card">
+            <h3>Cosa può consultare</h3>
+            <ul>
+              <li>nomi, settori e tecnologie;</li>
+              <li>stato, maturità, score e bisogni;</li>
+              <li>referenti, note e cronologia;</li>
+              <li>opportunità, tipi e scadenze.</li>
+            </ul>
+            <p class="small">Se un dato non è nell’archivio, l’assistente lo dichiara senza completarlo con informazioni esterne.</p>
+          </aside>
+        </div>
+
+        <div id="assistantAnswer" class="card assistant-answer" aria-live="polite">
+          <div class="assistant-empty">
+            <strong>Pronto per la ricerca</strong>
+            <span>Scrivi una domanda oppure scegli uno degli esempi.</span>
+          </div>
+        </div>
+      </section>
+
       <section id="importExport" class="section">
         <h2>Import / Export</h2>
         <p class="muted">Esporta un backup dell'archivio condiviso. Importa nuovi record senza cancellare o sovrascrivere quelli già online.</p>
@@ -904,7 +954,8 @@
           <ul>
             <li>Login email/password e archivio condiviso sono inclusi in V3.</li>
             <li>Ogni record ha una versione: modifiche concorrenti vengono segnalate, non sovrascritte silenziosamente.</li>
-            <li>Documenti, ruoli amministrativi e assistente AI non sono ancora implementati.</li>
+            <li>L’Assistente dati interroga esclusivamente i record presenti nell’archivio sincronizzato.</li>
+            <li>Documenti, ruoli amministrativi e integrazione con modelli AI esterni non sono ancora implementati.</li>
           </ul>
         </div>
       </section>
@@ -1584,5 +1635,6 @@
     renderAll();
     initCloudApp();
   </script>
+  <script src="./assistant.js"></script>
 </body>
 </html>

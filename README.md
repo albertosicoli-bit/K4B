@@ -1,6 +1,16 @@
 # K4B Innovation Radar
 
-Web app/PWA installabile per classificare e monitorare progetti, startup, call e opportunità. Versione 3: login Supabase e archivio online condiviso.
+Web app/PWA installabile per classificare e monitorare progetti, startup, call e opportunità. Versione 4: login Supabase, archivio online condiviso e Assistente dati privato.
+
+## Assistente dati V4
+
+La voce **Assistente dati** nel menu laterale consente di interrogare in linguaggio naturale i progetti e le opportunità già caricati. La funzione lavora nel browser sull'ultima copia sincronizzata da Supabase e non invia i record a servizi AI esterni.
+
+- Risponde a domande su score, stato, settore, maturità, tecnologia, bisogno, referente, scadenze e opportunità.
+- Può cercare un progetto per nome e proporre abbinamenti con opportunità dello stesso settore.
+- Mostra sempre i record utilizzati come fonti e permette di aprire le schede progetto.
+- Se non trova evidenze sufficienti, lo dichiara e suggerisce come riformulare la domanda.
+- Prima di interrogare dati modificati da un altro dispositivo, premere **Sincronizza dati**.
 
 ## Attivazione Cloud V3
 
@@ -44,7 +54,7 @@ La registrazione email dipende dalla configurazione email di Supabase e dai suoi
 
 Verifiche eseguite durante lo sviluppo: test della logica con API/DOM simulati, salvataggio tra due client, timeline, conflitti, import idempotente, preservazione backup locale, refresh token, logout e blocco offline. Non sono stati eseguiti login o scritture nel progetto Supabase reale. Il test visivo in browser non era disponibile nell'ambiente di sviluppo: controllare desktop e telefono durante la prova di accettazione.
 
-Documenti, assistente AI, audit storico, ripristino cancellazioni, ruoli avanzati e sincronizzazione offline non sono inclusi in V3.
+Documenti, modelli AI generativi esterni, audit storico, ripristino cancellazioni, ruoli avanzati e sincronizzazione offline non sono inclusi in V4.
 
 ## Pubblicazione con GitHub Pages
 
